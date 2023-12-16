@@ -17,6 +17,12 @@ builder.Services.AddDbContext<DataContext>(opt =>
     // opt.EnableDetailedErrors(); // Enable detailed error messages
     // opt.UseLazyLoadingProxies(); // Enable lazy loading proxies
 });
+// add CORS policiy
+builder.Services.AddCors( opt => {
+    opt.AddPolicy("CorsPolicy",policy =>{
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+    });
+});
 
 var app = builder.Build();
 
@@ -26,7 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+// use the policy
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
