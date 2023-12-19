@@ -1,44 +1,51 @@
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using Application.Activities;
 using Domain;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace API.Controllers
 {
+    // The ActivitiesController class derived from the BaseApiController class
     public class ActivitiesController : BaseApiController
     {
+        // HTTP GET method representing an endpoint that lists all activities: api/activities
         [HttpGet] // api/activities
-        public async Task<ActionResult<List<Activity>>> GetActivities()
+        public async Task<IActionResult> GetActivities()
         {
-            return await Mediator.Send(new List.Query{});
-        } 
+            // Send a request to the List.Query class in the application layer through the Mediator.Send() method
+            return HandleResult(await Mediator.Send(new List.Query { }));
+        }
+
+        // HTTP GET method representing an endpoint that retrieves a specific activity: api/activities/{id}
         [HttpGet("{id}")] // api/activities/{id}
-        public async Task<ActionResult<Activity>> GetActicity(Guid id)
+        public async Task<IActionResult> GetActicity(Guid id)
         {
-            return await Mediator.Send(new Details.Query{Id = id});
+            // Send a request with a specific ID to the Details.Query class in the application layer through the Mediator.Send() method
+            return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
         }
+
+        // HTTP POST method representing an endpoint that creates a new activity
         [HttpPost]
-        public async Task<IActionResult> CreateActivity([FromBody]Activity activity)
+        public async Task<IActionResult> CreateActivity([FromBody] Activity activity)
         {
-            await Mediator.Send(new Create.Command{Activity = activity});
-            return Ok();
+            // Send a request with activity information to the Create.Command class in the application layer through the Mediator.Send() method
+            return HandleResult(await Mediator.Send(new Create.Command { Activity = activity }));
         }
+
+        // HTTP PUT method representing an endpoint that updates a specific activity
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditActivity(Guid id, [FromBody]Activity activity)
+        public async Task<IActionResult> EditActivity(Guid id, [FromBody] Activity activity)
         {
+            // Assign the activity ID and then send a request with the updated activity information to the Edit.Command class in the application layer through the Mediator.Send() method
             activity.Id = id;
-            await Mediator.Send(new Edit.Command{Activity = activity});
-            return Ok();
+            return HandleResult(await Mediator.Send(new Edit.Command { Activity = activity }));
         }
+
+        // HTTP DELETE method representing an endpoint that deletes a specific activity
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await Mediator.Send(new Delete.Command{Id = id});
-            return Ok();
+            // Send a delete request with a specific ID to the Delete.Command class in the application layer through the Mediator.Send() method
+            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
         }
     }
 }
