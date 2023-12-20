@@ -1,5 +1,6 @@
 using Application.Activities;
 using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -32,6 +33,7 @@ namespace API.Controllers
         }
 
         // HTTP PUT method representing an endpoint that updates a specific activity
+        [Authorize(Policy = "IsActivityHost")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditActivity(Guid id, [FromBody] Activity activity)
         {
@@ -41,11 +43,21 @@ namespace API.Controllers
         }
 
         // HTTP DELETE method representing an endpoint that deletes a specific activity
+        [Authorize(Policy = "IsActivityHost")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             // Send a delete request with a specific ID to the Delete.Command class in the application layer through the Mediator.Send() method
             return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
         }
+
+        // HTTP POST method representing an endpoint that updates attendance for a specific activity
+        [HttpPost("{id}/attend")]
+        public async Task<IActionResult> Attend(Guid id)
+        {
+            // Send an update request for attendance to the UpdateAttendance.Command class in the application layer through the Mediator.Send() method
+            return HandleResult(await Mediator.Send(new UpdateAttendance.Command { Id = id }));
+        }
+
     }
 }
