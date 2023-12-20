@@ -1,14 +1,28 @@
+using System.Net;
 using API.Extensions;
 using API.Middleware;
+using Domain;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
+builder.Services.AddControllers(opt => 
+{
+    // Creates an authorization policy builder to define authorization policies
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    // Adds an authorization filter to the controller options with the specifies
+    opt.Filters.Add(new AuthorizeFilter(policy));
+});
+// add services
 builder.Services.AddApplicationServices(builder.Configuration);
+// add identity 
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -23,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 // use the policy
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -37,8 +52,10 @@ try
     var context = services.GetRequiredService<DataContext>();
     // Apply any pending migrations asynchronously to the database
     await context.Database.MigrateAsync();
+    // Attempt to retrieve the UserManager<AppUser> service from the service provider
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
     // Seed the database with initial data using the SeedData method
-    await Seed.SeedData(context);
+    await Seed.SeedData(context, userManager);
 }
 catch (Exception ex)
 {
