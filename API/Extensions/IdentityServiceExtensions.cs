@@ -39,6 +39,23 @@ namespace API.Extensions
                     ValidateIssuer = false, // does not validate the issuer
                     ValidateAudience = false // does not validate the audience
                 };
+                // JwtBearerEvents is used to add a custom event
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // Get the access token from the request query
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        // If the access token is present and the path starts with "/chat"
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
+                        {
+                            // Set the access token as the token
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
             services.AddAuthorization(opt =>
             {

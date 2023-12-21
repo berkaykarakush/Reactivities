@@ -1,6 +1,7 @@
 using System.Net;
 using API.Extensions;
 using API.Middleware;
+using API.SignalR;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+// SignalR
+app.MapHub<ChatHub>("/chat");
 // Create a scope for dependency injection to manage the lifetime of services
 using var scope = app.Services.CreateScope();
 // Get the service provider from the created scope
