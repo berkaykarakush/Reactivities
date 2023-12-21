@@ -24,8 +24,10 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            // user control
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            // Check if the user exists
+            var user = await _userManager.Users
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
             // return unauthorized operation if user is not found
             if (user == null) return Unauthorized();
             // perform password verification if the user exists
@@ -65,20 +67,23 @@ namespace API.Controllers
             return BadRequest(result.Errors);
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            // Get the current user based on the email claim
+            var user = await _userManager.Users
+                .Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.Email == User.FindFirstValue(ClaimTypes.Email));
+            // Return user information
             return CreateUserObject(user);
         }
-
+        // Helper method to create a UserDto object from an AppUser
         private UserDto CreateUserObject(AppUser user)
         {
             return new UserDto
             {
                 DisplayName = user.DisplayName,
-                Image = null,
+                Image = user?.Photos?.FirstOrDefault(u => u.IsMain)?.Url,
                 Token = _tokenService.CreateToken(user),
                 Username = user.UserName
             };
