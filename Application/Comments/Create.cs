@@ -64,6 +64,7 @@ namespace Application.Comments
                 // Save changes to the database
                 var success = await _context.SaveChangesAsync() > 0;
                 // If the save is successful, return a success result with the mapped CommentDto
+                // Kaydetme işlemi başarılı olursa, eşlenen CommentDto ile birlikte bir başarı sonucu döndürün
                 if(success) return Result<CommentDto>.Success(_mapper.Map<CommentDto>(comment));
                 // If there is a problem during saving, return a failure result with an error message
                 return Result<CommentDto>.Failure("Failed to add comment");

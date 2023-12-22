@@ -1,4 +1,5 @@
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain;
@@ -20,17 +21,19 @@ namespace Application.Activities
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
-            public Handler(DataContext context, IMapper mapper)
+            private readonly IUserAccessor _userAccessor;
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _context = context;
                 _mapper = mapper;
+                _userAccessor = userAccessor;
             }
             // Handling the retrieval of activity details based on the received query
             public async Task<Result<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 // Find the activity with the requested identity value from the database
                 var activity = await _context.Activities
-                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider) 
+                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new {currentUsername = _userAccessor.GetUserName()}) 
                     .FirstOrDefaultAsync(a => a.Id == request.Id);
                 // If the activity is not found, return null
                 if (activity == null) return null;
