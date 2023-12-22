@@ -10,10 +10,10 @@ namespace API.Controllers
     {
         // HTTP GET method representing an endpoint that lists all activities: api/activities
         [HttpGet] // api/activities
-        public async Task<IActionResult> GetActivities()
+        public async Task<IActionResult> GetActivities([FromQuery] ActivityParams param)
         {
-            // Send a request to the List.Query class in the application layer through the Mediator.Send() method
-            return HandleResult(await Mediator.Send(new List.Query { }));
+            // Send a query to retrieve a paged list of activities using Mediator
+            return HandlePagedResult(await Mediator.Send(new List.Query { Params = param }));
         }
 
         // HTTP GET method representing an endpoint that retrieves a specific activity: api/activities/{id}
