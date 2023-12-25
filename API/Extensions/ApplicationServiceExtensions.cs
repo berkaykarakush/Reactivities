@@ -19,7 +19,7 @@ namespace API.Extensions
             services.AddDbContext<DataContext>(opt =>
             {
                 // Retrieve the connection string from the configuration to set up the database connection.
-                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
                 // opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); // Set tracking behavior
                 // opt.EnableDetailedErrors(); // Enable detailed error messages
                 // opt.UseLazyLoadingProxies(); // Enable lazy loading proxies
