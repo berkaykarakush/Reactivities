@@ -4,6 +4,7 @@ using Domain;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing.Tree;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
@@ -20,11 +21,15 @@ namespace API.Extensions
             {
                 // Specifies that the password should not contain alphanumeric digits
                 opt.Password.RequireNonAlphanumeric = false;
-                // her kullanicinin bir emaili olmasi gerekmektedir
-                opt.User.RequireUniqueEmail = true;
+                // Specifies that the user must have a confirmed email to sign in
+                opt.SignIn.RequireConfirmedEmail = true;
             })
             // joins identity tables and our tables
-            .AddEntityFrameworkStores<DataContext>();
+            .AddEntityFrameworkStores<DataContext>()
+            // Adds the SignInManager service for handling sign-ins
+            .AddSignInManager<SignInManager<AppUser>>()
+            // Adds the default token providers for identity
+            .AddDefaultTokenProviders();
             // generates the symmetric key to be used for signing the token
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
             // add the authentication services
@@ -37,7 +42,10 @@ namespace API.Extensions
                     ValidateIssuerSigningKey = true, // specifies whether the signing key must be validated
                     IssuerSigningKey = key, // sets the signing key
                     ValidateIssuer = false, // does not validate the issuer
-                    ValidateAudience = false // does not validate the audience
+                    ValidateAudience = false, // does not validate the audience
+                    ValidateLifetime = true,  // Validates the expiration time of the token
+                    ClockSkew = TimeSpan.Zero // Sets the clock skew to zero, considering immediate expiration
+
                 };
                 // JwtBearerEvents is used to add a custom event
                 opt.Events = new JwtBearerEvents

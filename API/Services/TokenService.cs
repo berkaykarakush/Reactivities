@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Domain;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +39,7 @@ namespace API.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims), // adds clauses into token
-                Expires = DateTime.UtcNow.AddDays(7), // sets the validity of the token to 7 days
+                Expires = DateTime.UtcNow.AddMinutes(1), // sets the validity of the token to 7 days
                 SigningCredentials = creds // adds the token's signature information
             };
             // token manager to be used to create the token
@@ -47,6 +48,18 @@ namespace API.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             // converting token to text format
             return tokenHandler.WriteToken(token);
+        }
+        // Generates a secure refresh token using a cryptographically strong random number generator
+        public RefreshToken GenerateRefreshToken()
+        {
+            // Create a byte array to store random numbers
+            var randomNumber = new byte[32];
+            // Using statement ensures that the RandomNumberGenerator is properly disposed after use
+            using var rng = RandomNumberGenerator.Create();
+            // Fill the byte array with random numbers
+            rng.GetBytes(randomNumber);
+            // Convert the byte array to a base64-encoded string and return a new RefreshToken
+            return new RefreshToken { Token = Convert.ToBase64String(randomNumber) };
         }
     }
 }
