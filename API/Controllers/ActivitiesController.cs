@@ -18,7 +18,7 @@ namespace API.Controllers
 
         // HTTP GET method representing an endpoint that retrieves a specific activity: api/activities/{id}
         [HttpGet("{id}")] // api/activities/{id}
-        public async Task<IActionResult> GetActicity(Guid id)
+        public async Task<IActionResult> GetActivity(Guid id)
         {
             // Send a request with a specific ID to the Details.Query class in the application layer through the Mediator.Send() method
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
